@@ -2,7 +2,7 @@
 
 ## Automated checks
 
-`npm test` runs five tests covering 50 unique mission definitions, every generated counting/matching/pattern answer, all world unlock conditions, malformed-save recovery, volume bounds, duplicate-reward prevention, and independent local profiles.
+`npm test` runs seven tests covering 50 unique mission definitions, every generated counting/matching/pattern answer, all world unlock conditions, malformed-save recovery, volume bounds, duplicate-reward prevention, and independent local profiles.
 
 `npm run build` runs strict TypeScript checking and creates the production bundle and offline worker.
 
@@ -42,3 +42,7 @@ Results in the cloud machine: all 50 missions were individually completed across
 The browser checks use Chromium with software WebGL on a Linux cloud machine, including a 390 × 844 phone viewport. They do not verify Safari, actual iPad/Android hardware, installed voices, touch comfort for five-year-olds, or a frame-rate target. Those require real-device checks and supervised child playtesting. Browser narration can be unavailable; visible instructions remain available. The parent multiplication gate prevents casual accidental navigation, not determined access.
 
 No public hosting deployment is implied by these checks. Verify the exact GitHub repository and commit selected by the hosting project before declaring the site live.
+
+## Friendly narration checks
+
+With the development server running, `npm run test:voice` verifies asynchronous voice loading, enhanced-English selection, personalised sentence-by-sentence preview, gentle/cheerful delivery, the saved parent-selected voice, stop, mute, and cancellation of deferred speech. This browser test mocks speech synthesis to inspect delivery and cancellation reliably. It does not validate the audible quality of an iPhone voice; listen on the target device using Settings → Hear Pip’s voice.

@@ -3,6 +3,8 @@ export type Settings = {
   music: number;
   sound: number;
   voice: number;
+  voiceStyle: "storytime" | "cheerful";
+  voiceURI: string;
   reducedMotion: boolean;
   quality: "low" | "high";
   reminder: number;
@@ -35,6 +37,8 @@ const defaults: Settings = {
   music: 0.15,
   sound: 0.4,
   voice: 0.8,
+  voiceStyle: "storytime",
+  voiceURI: "",
   reducedMotion: false,
   quality: "high",
   reminder: 0,
@@ -91,6 +95,10 @@ export function parseSave(raw: string | null): Save {
     for (const key of ["music", "sound", "voice"] as const)
       if (typeof s[key] === "number" && Number.isFinite(s[key]))
         settings[key] = Math.max(0, Math.min(1, s[key]));
+    settings.voiceStyle =
+      s.voiceStyle === "cheerful" ? "cheerful" : "storytime";
+    settings.voiceURI =
+      typeof s.voiceURI === "string" ? s.voiceURI.slice(0, 500) : "";
     settings.reducedMotion = !!s.reducedMotion;
     settings.assistance = s.assistance !== false;
     settings.quality = s.quality === "low" ? "low" : "high";

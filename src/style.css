@@ -1546,3 +1546,44 @@ select {
     }
   }
 }
+.voice-settings {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #71567e;
+  border-radius: 16px;
+  background: #302443;
+}
+.voice-settings h2 {
+  color: #f5d4a3;
+}
+.voice-settings > p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #d0bbdc;
+}
+.voice-settings .setting {
+  align-items: flex-start;
+}
+.voice-settings select {
+  max-width: 65%;
+  font-size: 11px;
+}
+.voice-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+@media (max-width: 760px) {
+  .voice-settings {
+    padding: 15px;
+  }
+  .voice-settings .setting {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .voice-settings select {
+    width: 100%;
+    max-width: 100%;
+  }
+}

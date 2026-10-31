@@ -19,7 +19,7 @@ npm run preview -- --port 4174
 npm run test:release
 ```
 
-`npm test` runs five checks covering mission coverage, generated puzzle answers, unlocking, corrupted saves, duplicate rewards, and independent local profiles. Browser gameplay and offline verification are documented in `QA.md`.
+`npm test` runs seven checks covering mission coverage, generated puzzle answers, unlocking, corrupted saves, duplicate rewards, and independent local profiles. Browser gameplay and offline verification are documented in `QA.md`.
 
 ## Play
 
@@ -36,6 +36,8 @@ Complete a mission to earn three stars, awarded only once. Complete all ten in a
 ## Stories, audio, accessibility
 
 Each world has a story and clearly labelled science facts. Magical Galaxy content is explicitly imaginative. Voice guidance uses device/browser speech synthesis and has visible text; voices may be unavailable on some devices. Original lightweight background melodies and interaction sounds use the Web Audio API, starting after interaction. Music, effects, and voice have separate volume controls and a mute-all button.
+
+Pip’s voice settings offer **Gentle storytime** and **Cheerful explorer** delivery, a saved English voice picker, and a personalised preview. Automatic selection favours enhanced/natural English voices when available, including voices provided asynchronously by iOS. Narration uses short sentences with small pauses and lowers background music while speaking. Stop, mute, screen navigation, and hiding the app cancel pending speech. On iPhone, installing an enhanced English voice in Accessibility → Read & Speak / Spoken Content → Voices can improve the sound. This is device speech synthesis, not recorded voice acting; quality depends on the installed voices.
 
 Settings include reduced decorative motion, lightweight rendering, and flight assistance. Mission motion required for gameplay remains active. Controls have keyboard, mouse, and touch alternatives. No third-party art or remote fonts are loaded.
 

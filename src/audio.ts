@@ -1,4 +1,6 @@
 import { store } from "./state";
+import { isNarrating, stopVoice } from "./voice";
+export { speak, stopVoice } from "./voice";
 let ctx: AudioContext | undefined;
 let musicTimer: ReturnType<typeof setInterval> | undefined;
 let note = 0;
@@ -45,20 +47,12 @@ export function music() {
   musicTimer = setInterval(() => {
     if (document.hidden) return;
     const melody = [261, 329, 392, 329, 293, 349, 440, 392];
-    tone(melody[note++ % melody.length], 0.65, store.get().settings.music);
+    tone(
+      melody[note++ % melody.length],
+      0.65,
+      store.get().settings.music * (isNarrating() ? 0.25 : 1),
+    );
   }, 700);
-}
-export function speak(text: string) {
-  if (!("speechSynthesis" in window) || !store.get().settings.voice) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.85;
-  utterance.volume = store.get().settings.voice;
-  utterance.lang = "en-AU";
-  window.speechSynthesis.speak(utterance);
-}
-export function stopVoice() {
-  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 }
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {

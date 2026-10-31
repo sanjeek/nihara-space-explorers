@@ -64,3 +64,59 @@ test("Mission completion is idempotent and local profiles keep independent rewar
   store.switch("captain-1");
   assert.deepEqual(store.profile().done, [1]);
 });
+
+import {
+  chooseVoice,
+  voiceDelivery,
+  storySentences,
+} from "../src/voice-options.ts";
+const sampleVoice = (name: string, lang: string, uri = name) => ({
+  name,
+  lang,
+  voiceURI: uri,
+  localService: true,
+  default: false,
+});
+test("Narration favours enhanced English voices and honours the parent choice", () => {
+  const standard = sampleVoice("Default voice", "en-US");
+  const enhanced = sampleVoice(
+    "Karen",
+    "en-AU",
+    "com.apple.voice.enhanced.en-AU.Karen",
+  );
+  const other = sampleVoice("Premium voice", "fr-FR");
+  assert.equal(
+    chooseVoice([standard, enhanced, other])?.voiceURI,
+    enhanced.voiceURI,
+  );
+  assert.equal(
+    chooseVoice([standard, enhanced], standard.voiceURI)?.voiceURI,
+    standard.voiceURI,
+  );
+  assert.equal(chooseVoice([other]), undefined);
+  assert.equal(
+    chooseVoice([enhanced], "voice-no-longer-installed")?.voiceURI,
+    enhanced.voiceURI,
+  );
+});
+test("Narration has gentle, restrained delivery and sentence breaks", () => {
+  assert.equal(voiceDelivery("storytime").rate, 0.94);
+  assert.ok(voiceDelivery("cheerful").pitch < 1.2);
+  assert.deepEqual(
+    storySentences("Hello, Captain! Take your time. I'm here with you."),
+    ["Hello, Captain!", "Take your time.", "I'm here with you."],
+  );
+  const old = parseSave(
+    JSON.stringify({ profiles: [{ done: [1] }], settings: {} }),
+  );
+  assert.equal(old.settings.voiceStyle, "storytime");
+  assert.equal(old.settings.voiceURI, "");
+  const custom = parseSave(
+    JSON.stringify({
+      profiles: [{ done: [1] }],
+      settings: { voiceStyle: "cheerful", voiceURI: "enhanced-karen" },
+    }),
+  );
+  assert.equal(custom.settings.voiceStyle, "cheerful");
+  assert.equal(custom.settings.voiceURI, "enhanced-karen");
+});

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Scene, { controlKey } from "./Scene";
+import VoiceSettings from "./VoiceSettings";
 import Puzzle from "./Puzzle";
 import { missions, worlds, worldUnlocked, type Mission } from "./missions";
 import { store, useSave } from "./state";
@@ -78,9 +79,9 @@ export default function App() {
     setWon(true);
     sound("win");
     speak(
-      "Wonderful work, Captain " +
+      "Hooray, Captain " +
         p.name +
-        "! Mission complete. You earned three stars.",
+        "! What wonderful exploring! Three twinkly stars, just for you. I loved our little adventure together.",
     );
   }
   function askParent() {
@@ -765,6 +766,7 @@ export default function App() {
             >
               Mute everything
             </button>
+            <VoiceSettings />
             <label className="setting">
               <span>Gentle motion</span>
               <input
