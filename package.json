@@ -10,7 +10,8 @@
     "test": "node --experimental-strip-types tests/missions.test.ts",
     "test:browser": "node tests/browser.mjs",
     "test:release": "node tests/settings.browser.mjs && node tests/offline.browser.mjs",
-    "test:voice": "node tests/voice.browser.mjs"
+    "test:voice": "node tests/voice.browser.mjs",
+    "test:playroom": "node tests/playroom.browser.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.0",

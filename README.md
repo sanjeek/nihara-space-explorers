@@ -1,6 +1,6 @@
 # Nihara Space Explorers
 
-**Little Astronaut Academy** is a separate, original 3D browser game for young explorers. It contains 50 playable mission definitions across Earth & Moon, Mars, Jupiter’s orbital stations, Saturn, and an imaginary Magical Galaxy. Ten missions per world use eight reusable gameplay modes, with increasing targets and puzzle difficulty.
+**Little Astronaut Academy** is a separate, original 3D browser game for young explorers. It contains 55 playable mission definitions across Earth & Moon, Mars, Jupiter’s orbital stations, Saturn, and an imaginary Magical Galaxy. Each world has ten original adventures and a new hands-on addition picnic. The home playroom makes nine game types immediately available without unlocking a world.
 
 ## Run locally
 
@@ -19,7 +19,15 @@ npm run preview -- --port 4174
 npm run test:release
 ```
 
-`npm test` runs seven checks covering mission coverage, generated puzzle answers, unlocking, corrupted saves, duplicate rewards, and independent local profiles. Browser gameplay and offline verification are documented in `QA.md`.
+`npm test` runs nine checks covering mission coverage, generated puzzle answers, unlocking, corrupted saves, duplicate rewards, and independent local profiles. Browser gameplay and offline verification are documented in `QA.md`.
+
+## Playroom
+
+The home screen now starts with nine large activity cards: Feed Momo, treasure counting, shape rescue, patterns, memory lights, sorting, rocket building, flying, and moonwalking. Every card is immediately playable. Choose Little steps, Growing explorer, or Ready for a challenge. Completing a free-play activity returns to the choice of games; no forced sequence is required.
+
+**Feed Momo** has two bowls of berries. Tap or drag berries into the picnic tray, then choose their combined total. Both addends are positive and every sum is strictly below 10. The Count with Pip helper demonstrates the total. All counting questions are also limited to 1–9, with smaller sets at the gentle setting. There are three rounds, gentle retries, and a short celebration between answers. Original missions 1–50 and their rewards remain intact; addition missions 51–55 save separately.
+
+With the development server running, `npm run test:playroom` validates the phone playroom, actual berry dragging/tapping, retries, counting help, difficulty choices, and saved addition rewards.
 
 ## Play
 

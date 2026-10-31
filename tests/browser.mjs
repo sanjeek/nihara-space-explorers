@@ -23,10 +23,10 @@ import { chromium } from "playwright";
         profiles: [
           {
             name: "QA Captain",
-            done: Array.from({ length: 50 }, (_, i) => i + 1).filter(
+            done: Array.from({ length: 55 }, (_, i) => i + 1).filter(
               (v) => v !== id,
             ),
-            stars: 147,
+            stars: 162,
           },
         ],
         settings: {
@@ -56,10 +56,7 @@ import { chromium } from "playwright";
     );
     await p.getByRole("button", { name: "Let’s explore" }).click();
     await p.locator(".world-tabs button").nth(m.world).click();
-    await p
-      .locator(".mission-card")
-      .nth((m.id - 1) % 10)
-      .click();
+    await p.locator(`.mission-card[data-mission="${m.id}"]`).click();
     await p.getByRole("button", { name: "Ready, Captain!" }).click();
     if (m.mode === "flight") {
       await p.waitForFunction(() => window.__space?.mode === "flight");
@@ -141,7 +138,7 @@ import { chromium } from "playwright";
             const b = document.querySelector(".puzzle-answers button");
             return b && !b.disabled;
           });
-          for (let i = 0; i < 3 + Math.floor(m.world / 2); i++) {
+          for (let i = 0; i < 2 + Math.floor(m.world / 2); i++) {
             const index = (i * i + i + m.world + round) % 4;
             await p.locator(".puzzle-answers button").nth(index).click();
           }
@@ -164,6 +161,9 @@ import { chromium } from "playwright";
           await p.getByRole("button", { name: "Ready for launch" }).click();
         } else {
           const q = questionFor(m, round);
+          if (m.mode === "addition") {
+            await p.getByRole("button", { name: "Count with Pip" }).click();
+          }
           await p
             .locator(".puzzle-answers")
             .getByRole("button", { name: q.answer, exact: true })
@@ -177,7 +177,7 @@ import { chromium } from "playwright";
     const save = await p.evaluate(() =>
       JSON.parse(localStorage.getItem("nihara-space-v1")),
     );
-    if (save.profiles[0].done.length !== 50 || save.profiles[0].stars !== 150)
+    if (save.profiles[0].done.length !== 55 || save.profiles[0].stars !== 165)
       throw Error("Reward incorrect mission " + m.id);
     console.log("PASS", m.id, m.mode, m.title);
   }

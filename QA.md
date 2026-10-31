@@ -2,11 +2,11 @@
 
 ## Automated checks
 
-`npm test` runs seven tests covering 50 unique mission definitions, every generated counting/matching/pattern answer, all world unlock conditions, malformed-save recovery, volume bounds, duplicate-reward prevention, and independent local profiles.
+`npm test` runs nine tests covering 55 unique mission definitions, every generated counting/matching/pattern answer, all world unlock conditions, malformed-save recovery, volume bounds, duplicate-reward prevention, and independent local profiles.
 
 `npm run build` runs strict TypeScript checking and creates the production bundle and offline worker.
 
-`npm run test:browser` exercises all 50 mission definitions with real browser controls: drag steering through rings, projected ground taps to walk to each crystal and the alien, and actual answer/sequence/sort/workshop interactions. Each mission runs with an independent valid save fixture that unlocks the relevant world. Each completion must award the missing mission and exactly three stars, bringing the fixture to 50 completed missions and 150 stars. This checks each mission individually; it is not a child playtest or a timing/performance benchmark.
+`npm run test:browser` exercises all 55 mission definitions with real browser controls: drag steering through rings, projected ground taps to walk to each crystal and the alien, and actual answer/sequence/sort/workshop interactions. Each mission runs with an independent valid save fixture that unlocks the relevant world. Each completion must award the missing mission and exactly three stars, bringing the fixture to 55 completed missions and 165 stars. This checks each mission individually; it is not a child playtest or a timing/performance benchmark.
 
 To run browser checks:
 
@@ -46,3 +46,7 @@ No public hosting deployment is implied by these checks. Verify the exact GitHub
 ## Friendly narration checks
 
 With the development server running, `npm run test:voice` verifies asynchronous voice loading, enhanced-English selection, personalised sentence-by-sentence preview, gentle/cheerful delivery, the saved parent-selected voice, stop, mute, and cancellation of deferred speech. This browser test mocks speech synthesis to inspect delivery and cancellation reliably. It does not validate the audible quality of an iPhone voice; listen on the target device using Settings → Hear Pip’s voice.
+
+## Playroom and maths update
+
+All five new addition missions completed in Chromium. Representative counting, memory, sorting, and rocket assembly checks passed after adding intermediate celebrations. `npm run test:playroom` checks berry dragging/tapping, a wrong answer with unlimited retry, three-round completion, the Count with Pip helper, direct access to a harder activity without world unlocks, and saved rewards for missions 51 and 55. Unit tests exercise 1,500 generated addition questions, verifying positive addends, unique answer choices, and totals strictly below ten. Old mission IDs and saved rewards remain intact. These checks verify functioning interactions, not whether a particular child will enjoy them; supervised playtesting remains necessary.

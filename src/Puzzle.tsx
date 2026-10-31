@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { questionFor, symbols, type Mission } from "./missions";
 import { sound, speak } from "./audio";
+import AdditionGame from "./AdditionGame";
 export default function Puzzle({
   mission: m,
+  variation = 0,
   onProgress,
   onComplete,
 }: {
   mission: Mission;
+  variation?: number;
   onProgress: (n: number) => void;
   onComplete: () => void;
 }) {
@@ -22,9 +25,15 @@ export default function Puzzle({
     [fin, setFin] = useState("");
   const drag = useRef<number | null>(null);
   const finished = useRef(false);
+  const busy = useRef(false);
+  const celebrationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const [celebrating, setCelebrating] = useState(false);
+  useEffect(() => () => clearTimeout(celebrationTimer.current), []);
   const size = 3 + Math.min(m.world, 3);
   const sequence = Array.from(
-    { length: 3 + Math.floor(m.world / 2) },
+    { length: 2 + Math.floor(m.world / 2) },
     (_, i) => (i * i + i + m.world + round) % 4,
   );
   useEffect(() => {
@@ -50,7 +59,9 @@ export default function Puzzle({
     return () => clearTimeout(timer);
   }, [round, replay, m.id]);
   function advance() {
-    if (finished.current) return;
+    if (finished.current || busy.current) return;
+    busy.current = true;
+    setCelebrating(true);
     sound("star");
     setMessage("Wonderful work, Captain!");
     if (round === 2) {
@@ -60,18 +71,25 @@ export default function Puzzle({
       return;
     }
     onProgress(round + 1);
-    setRound((v) => v + 1);
-    setSelected([]);
-    setColor("");
-    setFin("");
-    setMistakes(0);
+    celebrationTimer.current = setTimeout(() => {
+      setRound((v) => v + 1);
+      setSelected([]);
+      setColor("");
+      setFin("");
+      setMistakes(0);
+      setCelebrating(false);
+      busy.current = false;
+    }, 850);
   }
+
   function wrong() {
-    sound("bump");
+    if (busy.current) return;
+    sound("tap");
     setMistakes((v) => v + 1);
-    setMessage("You’re learning! Take another look. Try again.");
+    setMessage("That’s okay! Let’s look together. There’s no hurry.");
   }
   function choose(index: number) {
+    if (busy.current) return;
     if (m.mode === "sequence") {
       if (index !== sequence[input.length]) {
         wrong();
@@ -84,13 +102,39 @@ export default function Puzzle({
       if (next.length === sequence.length) advance();
     }
   }
-  const q = questionFor(m, round);
+  const q = questionFor(m, round, variation);
   const colours = ["#ad9af4", "#f4be76", "#79d8cc"];
   const colourNames = ["Purple", "Orange", "Mint"];
   const neededColor = (m.world + round) % 3,
     neededFin = round % 2 ? "pointy" : "round";
+  function hearTask() {
+    if (m.mode === "workshop") {
+      speak(
+        `Pip needs a little rocket. Choose ${colourNames[neededColor]} and ${neededFin} fins. Then tap ready for launch.`,
+      );
+      return;
+    }
+    if (m.mode === "addition") {
+      speak(
+        q.visual
+          .replace("+", " plus ")
+          .replace(
+            "= ?",
+            ". Move both bowls into the tray, then count them together.",
+          ),
+      );
+      return;
+    }
+    speak(m.instructions);
+  }
   return (
-    <section className="puzzle-card">
+    <section
+      className={
+        "puzzle-card " +
+        (m.mode === "addition" ? "picnic-card " : "") +
+        (celebrating ? "is-celebrating" : "")
+      }
+    >
       <span className="eyebrow">LITTLE THINKERS · {round + 1} / 3</span>
       <h2>
         {m.mode === "sequence"
@@ -101,154 +145,176 @@ export default function Puzzle({
               ? "Build the captain’s rocket"
               : q.prompt}
       </h2>
-      {m.mode === "sequence" ? (
-        <>
-          <p>
-            {watching
-              ? "Watch the lights…"
-              : "Your turn! Tap the lights in the same order."}
-          </p>
-          <div className="puzzle-answers">
-            {symbols.map((v, i) => (
-              <button
-                key={v}
-                aria-label={["Star", "Moon", "Sun", "Crystal"][i]}
-                disabled={watching}
-                className={flashing === i ? "lit" : ""}
-                onClick={() => choose(i)}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-          <button className="text-btn" onClick={() => setReplay((v) => v + 1)}>
-            ↻ Watch again
-          </button>
-          <p>
-            {input.length} / {sequence.length}
-          </p>
-        </>
-      ) : m.mode === "sort" ? (
-        <>
-          <p>Tap or drag the rocks, starting with the smallest.</p>
-          <div className="sort-rocks">
-            {Array.from({ length: size }, (_, i) => ((i + 2) % size) + 1).map(
-              (n) => (
+      <fieldset className="activity-fieldset" disabled={celebrating}>
+        {m.mode === "addition" ? (
+          <AdditionGame
+            key={round}
+            mission={m}
+            round={round}
+            variation={variation}
+            onCorrect={advance}
+            onWrong={wrong}
+            mistakes={mistakes}
+          />
+        ) : m.mode === "sequence" ? (
+          <>
+            <p>
+              {watching
+                ? "Watch the lights…"
+                : "Your turn! Tap the lights in the same order."}
+            </p>
+            <div className="puzzle-answers">
+              {symbols.map((v, i) => (
                 <button
-                  key={n}
-                  data-size={n}
-                  draggable={!selected.includes(n)}
-                  disabled={selected.includes(n)}
-                  aria-label={"Rock size " + n}
-                  onDragStart={() => (drag.current = n)}
+                  key={v}
+                  aria-label={["Star", "Moon", "Sun", "Crystal"][i]}
+                  disabled={watching}
+                  className={flashing === i ? "lit" : ""}
+                  onClick={() => choose(i)}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+            <button
+              className="text-btn"
+              onClick={() => setReplay((v) => v + 1)}
+            >
+              ↻ Watch again
+            </button>
+            <p>
+              {input.length} / {sequence.length}
+            </p>
+          </>
+        ) : m.mode === "sort" ? (
+          <>
+            <p>Tap or drag the rocks, starting with the smallest.</p>
+            <div className="sort-rocks">
+              {Array.from({ length: size }, (_, i) => ((i + 2) % size) + 1).map(
+                (n) => (
+                  <button
+                    key={n}
+                    data-size={n}
+                    draggable={!selected.includes(n)}
+                    disabled={selected.includes(n)}
+                    aria-label={"Rock size " + n}
+                    onDragStart={() => (drag.current = n)}
+                    onClick={() => {
+                      if (n === selected.length + 1) {
+                        const next = [...selected, n];
+                        setSelected(next);
+                        sound("star");
+                        if (next.length === size) advance();
+                      } else wrong();
+                    }}
+                  >
+                    <span style={{ fontSize: 18 + n * 6 }}>🪨</span>
+                    <small>{n}</small>
+                  </button>
+                ),
+              )}
+            </div>
+            <div
+              className="drop-zone"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const n = drag.current;
+                drag.current = null;
+                if (n === selected.length + 1) {
+                  const next = [...selected, n];
+                  setSelected(next);
+                  if (next.length === size) advance();
+                  else sound("star");
+                } else wrong();
+              }}
+            >
+              👇 {selected.map(() => "🪨").join(" ")}
+              <span> Drop the next rock here</span>
+            </div>
+          </>
+        ) : m.mode === "workshop" ? (
+          <>
+            <p>
+              Choose <b>{colourNames[neededColor]}</b> and <b>{neededFin}</b>{" "}
+              fins.
+            </p>
+            <div className="build-request">
+              <span style={{ background: colours[neededColor] }}>🎨</span>
+              <span>{neededFin === "round" ? "●" : "▲"}</span>
+            </div>
+            <div className="colour-options">
+              {colours.map((c, i) => (
+                <button
+                  key={c}
+                  aria-label={colourNames[i]}
+                  className={color === c ? "chosen" : ""}
+                  style={{ background: c }}
+                  onClick={() => setColor(c)}
+                >
+                  {color === c ? "✓" : ""}
+                </button>
+              ))}
+            </div>
+            <div className="fin-options">
+              {["round", "pointy"].map((f) => (
+                <button
+                  key={f}
+                  className={fin === f ? "chosen" : ""}
+                  onClick={() => setFin(f)}
+                >
+                  {f === "round" ? "●" : "▲"} {f}
+                </button>
+              ))}
+            </div>
+            <button
+              className="primary"
+              onClick={() => {
+                if (color === colours[neededColor] && fin === neededFin)
+                  advance();
+                else wrong();
+              }}
+            >
+              🚀 Ready for launch
+            </button>
+          </>
+        ) : (
+          <>
+            <div
+              className={
+                "question-visual " + (m.mode === "count" ? "count-items" : "")
+              }
+            >
+              {q.visual}
+            </div>
+            <div className="puzzle-answers">
+              {q.choices.map((v, i) => (
+                <button
+                  key={i}
+                  className={
+                    mistakes >= 3 && v === q.answer ? "hint-answer" : ""
+                  }
                   onClick={() => {
-                    if (n === selected.length + 1) {
-                      const next = [...selected, n];
-                      setSelected(next);
-                      sound("star");
-                      if (next.length === size) advance();
-                    } else wrong();
+                    if (v === q.answer) advance();
+                    else wrong();
                   }}
                 >
-                  <span style={{ fontSize: 18 + n * 6 }}>🪨</span>
-                  <small>{n}</small>
+                  {v}
                 </button>
-              ),
-            )}
-          </div>
-          <div
-            className="drop-zone"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              const n = drag.current;
-              drag.current = null;
-              if (n === selected.length + 1) {
-                const next = [...selected, n];
-                setSelected(next);
-                if (next.length === size) advance();
-                else sound("star");
-              } else wrong();
-            }}
-          >
-            👇 {selected.map(() => "🪨").join(" ")}
-            <span> Drop the next rock here</span>
-          </div>
-        </>
-      ) : m.mode === "workshop" ? (
-        <>
-          <p>
-            Choose <b>{colourNames[neededColor]}</b> and <b>{neededFin}</b>{" "}
-            fins.
-          </p>
-          <div className="build-request">
-            <span style={{ background: colours[neededColor] }}>🎨</span>
-            <span>{neededFin === "round" ? "●" : "▲"}</span>
-          </div>
-          <div className="colour-options">
-            {colours.map((c, i) => (
-              <button
-                key={c}
-                aria-label={colourNames[i]}
-                className={color === c ? "chosen" : ""}
-                style={{ background: c }}
-                onClick={() => setColor(c)}
-              >
-                {color === c ? "✓" : ""}
-              </button>
-            ))}
-          </div>
-          <div className="fin-options">
-            {["round", "pointy"].map((f) => (
-              <button
-                key={f}
-                className={fin === f ? "chosen" : ""}
-                onClick={() => setFin(f)}
-              >
-                {f === "round" ? "●" : "▲"} {f}
-              </button>
-            ))}
-          </div>
-          <button
-            className="primary"
-            onClick={() => {
-              if (color === colours[neededColor] && fin === neededFin)
-                advance();
-              else wrong();
-            }}
-          >
-            🚀 Ready for launch
-          </button>
-        </>
-      ) : (
-        <>
-          <div
-            className={
-              "question-visual " + (m.mode === "count" ? "count-items" : "")
-            }
-          >
-            {q.visual}
-          </div>
-          <div className="puzzle-answers">
-            {q.choices.map((v, i) => (
-              <button
-                key={i}
-                className={mistakes >= 3 && v === q.answer ? "hint-answer" : ""}
-                onClick={() => {
-                  if (v === q.answer) advance();
-                  else wrong();
-                }}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-        </>
+              ))}
+            </div>
+          </>
+        )}
+      </fieldset>
+      {celebrating && (
+        <div className="little-celebration" role="status">
+          🌟 You helped a friend! 🌟
+        </div>
       )}
       <p className="feedback" aria-live="polite">
         {message}
       </p>
-      <button className="text-btn" onClick={() => speak(m.instructions)}>
+      <button className="text-btn" onClick={hearTask}>
         🔊 Hear instructions
       </button>
     </section>

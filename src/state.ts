@@ -62,7 +62,7 @@ export function parseSave(raw: string | null): Save {
             Array.isArray(p.done)
               ? p.done.filter(
                   (id: unknown) =>
-                    Number.isInteger(id) && Number(id) > 0 && Number(id) <= 50,
+                    Number.isInteger(id) && Number(id) > 0 && Number(id) <= 55,
                 )
               : [],
           ),
@@ -154,7 +154,7 @@ export const store = {
     persist();
   },
   complete: (id: number) => {
-    if (!Number.isInteger(id) || id < 1 || id > 50) return;
+    if (!Number.isInteger(id) || id < 1 || id > 55) return;
     const p = store.profile();
     if (!p.done.includes(id))
       store.updateProfile({ done: [...p.done, id], stars: p.stars + 3 });

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Scene, { controlKey } from "./Scene";
 import VoiceSettings from "./VoiceSettings";
 import Puzzle from "./Puzzle";
+import Playroom from "./Playroom";
 import { missions, worlds, worldUnlocked, type Mission } from "./missions";
 import { store, useSave } from "./state";
 import { music, sound, speak, stopVoice } from "./audio";
@@ -18,6 +19,7 @@ const modeIcons: Record<string, string> = {
   flight: "🚀",
   explore: "👩‍🚀",
   count: "🔢",
+  addition: "🍓",
   rescue: "👽",
   pattern: "🌈",
   sequence: "💡",
@@ -39,6 +41,8 @@ export default function App() {
     [confirm, setConfirm] = useState(false),
     [reminder, setReminder] = useState(false),
     [attempt, setAttempt] = useState(0),
+    [practice, setPractice] = useState(false),
+    [playLevel, setPlayLevel] = useState(0),
     [saveWarning, setSaveWarning] = useState(false);
   const sessionStart = useRef(Date.now()),
     gateQuestion = useRef([7, 8]);
@@ -60,11 +64,14 @@ export default function App() {
   function navigate(r: Route) {
     stopVoice();
     setRoute(r);
+    window.scrollTo(0, 0);
     setWon(false);
     setIntro(false);
     sound();
   }
-  function start(m: Mission) {
+  function start(m: Mission, freePlay = false) {
+    setPractice(freePlay);
+    window.scrollTo(0, 0);
     setMission(m);
     setWorld(m.world);
     setProgress(0);
@@ -72,7 +79,7 @@ export default function App() {
     setIntro(true);
     setAttempt((v) => v + 1);
     setRoute("play");
-    speak(worlds[m.world].story);
+    speak(freePlay ? m.instructions : worlds[m.world].story);
   }
   function complete() {
     store.complete(mission.id);
@@ -184,6 +191,12 @@ export default function App() {
       {route === "home" ? (
         <>
           <main className="home">
+            <Playroom
+              name={p.name}
+              onPlay={(m) => start(m, true)}
+              level={playLevel}
+              onLevel={setPlayLevel}
+            />
             <div className="hero">
               <div className="hero-copy">
                 <span className="eyebrow">
@@ -258,8 +271,9 @@ export default function App() {
                       <p>{w.description}</p>
                       <span className="mission-count">
                         {
-                          p.done.filter((id) => missions[id - 1].world === i)
-                            .length
+                          p.done.filter(
+                            (id) => id <= 50 && missions[id - 1].world === i,
+                          ).length
                         }{" "}
                         / 10 missions <span>•••</span>
                       </span>
@@ -352,6 +366,7 @@ export default function App() {
                 .filter((m) => m.world === world)
                 .map((m) => (
                   <button
+                    data-mission={m.id}
                     className={
                       "mission-card " +
                       (p.done.includes(m.id) ? "complete" : "")
@@ -394,14 +409,16 @@ export default function App() {
           <div className="play-heading">
             <button
               className="circle-btn"
-              aria-label="Return to missions"
-              onClick={() => navigate("map")}
+              aria-label={practice ? "Back to playroom" : "Return to missions"}
+              onClick={() => navigate(practice ? "home" : "map")}
             >
               ←
             </button>
             <div>
               <small>
-                MISSION {mission.id} · {worlds[mission.world].name}
+                {practice
+                  ? "PLAYTIME · PIP’S LITTLE GAMES"
+                  : `MISSION ${mission.id} · ${worlds[mission.world].name}`}
               </small>
               <h2>{mission.title}</h2>
             </div>
@@ -424,7 +441,14 @@ export default function App() {
               ↻
             </button>
           </div>
-          <div className="game-stage">
+          <div
+            className={
+              "game-stage " +
+              (!["flight", "explore"].includes(mission.mode)
+                ? "puzzle-stage"
+                : "")
+            }
+          >
             <Scene
               key={mission.id + "-" + attempt}
               mission={
@@ -457,6 +481,7 @@ export default function App() {
                 <Puzzle
                   key={mission.id + "-" + attempt}
                   mission={mission}
+                  variation={practice ? attempt : 0}
                   onProgress={setProgress}
                   onComplete={complete}
                 />
@@ -500,18 +525,26 @@ export default function App() {
                 <article className="modal">
                   <span className="big-emoji">{modeIcons[mission.mode]}</span>
                   <span className="eyebrow">
-                    CAPTAIN {p.name.toUpperCase()} · MISSION {mission.id}
+                    {practice
+                      ? `PLAY WITH PIP · ${p.name.toUpperCase()}`
+                      : `CAPTAIN ${p.name.toUpperCase()} · MISSION ${mission.id}`}
                   </span>
                   <h2>{mission.title}</h2>
                   <p>{mission.instructions}</p>
-                  <p className="story-excerpt">{worlds[mission.world].story}</p>
+                  <p className="story-excerpt">
+                    {practice
+                      ? "One little activity at a time. No hurry. Pip is here to help."
+                      : worlds[mission.world].story}
+                  </p>
                   <button
                     className="text-btn"
                     onClick={() =>
                       speak(
                         mission.instructions +
                           " " +
-                          worlds[mission.world].story,
+                          (practice
+                            ? "Take your time. I’m right here with you."
+                            : worlds[mission.world].story),
                       )
                     }
                   >
@@ -555,19 +588,28 @@ export default function App() {
                   <button
                     className="primary"
                     onClick={() =>
-                      canNext
-                        ? start(next)
-                        : navigate(next ? "map" : "collection")
+                      practice
+                        ? navigate("home")
+                        : canNext
+                          ? start(next)
+                          : navigate(next ? "map" : "collection")
                     }
                   >
-                    {canNext
-                      ? "Next adventure →"
-                      : next
-                        ? "Back to this world →"
-                        : "See my collection →"}
+                    {practice
+                      ? "Choose another game →"
+                      : canNext
+                        ? "Next adventure →"
+                        : next
+                          ? "Back to this world →"
+                          : "See my collection →"}
                   </button>
-                  <button className="text-btn" onClick={() => navigate("map")}>
-                    Back to mission map
+                  <button
+                    className="text-btn"
+                    onClick={() =>
+                      practice ? start(mission, true) : navigate("map")
+                    }
+                  >
+                    {practice ? "Play this game again" : "Back to mission map"}
                   </button>
                 </article>
               </div>
@@ -675,7 +717,7 @@ export default function App() {
           <div className="collection-grid">
             {worlds.map((w, i) => {
               const n = p.done.filter(
-                (id) => missions[id - 1].world === i,
+                (id) => id <= 50 && missions[id - 1].world === i,
               ).length;
               return (
                 <article
@@ -849,7 +891,7 @@ export default function App() {
               <h2>{p.name}’s discoveries</h2>
               <div className="stats">
                 <span>
-                  <b>{p.done.length}/50</b>Missions
+                  <b>{p.done.length}/55</b>Missions
                 </span>
                 <span>
                   <b>{p.stars}</b>Stars
