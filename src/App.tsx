@@ -123,7 +123,7 @@ export default function App() {
           <span className="brand-symbol">✦</span>
           <span>
             <b>
-              nihara<span className="brand-dot">.</span>
+              Nihara
             </b>
             <small>SPACE EXPLORERS</small>
           </span>
