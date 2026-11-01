@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { nextNumberProgress } from "./next-number.ts";
 export type Settings = {
   music: number;
   sound: number;
@@ -14,6 +15,7 @@ export type Profile = {
   id: string;
   name: string;
   done: number[];
+  bunnyDone: number[];
   stars: number;
   colour: string;
   fin: "round" | "pointy";
@@ -26,6 +28,7 @@ const fresh = (name = "Nihara", id = "captain-1"): Profile => ({
   id,
   name,
   done: [],
+  bunnyDone: [],
   stars: 0,
   colour: "#ad9af4",
   fin: "round",
@@ -70,6 +73,7 @@ export function parseSave(raw: string | null): Save {
         return {
           ...base,
           done,
+          bunnyDone: nextNumberProgress(p.bunnyDone),
           stars: done.length * 3,
           colour: ["#ad9af4", "#f4be76", "#79d8cc", "#f499b9"].includes(
             p.colour || "",
@@ -158,6 +162,10 @@ export const store = {
     const p = store.profile();
     if (!p.done.includes(id))
       store.updateProfile({ done: [...p.done, id], stars: p.stars + 3 });
+  },
+  completeBunny: (id: number) => {
+    const p = store.profile();
+    store.updateProfile({ bunnyDone: nextNumberProgress([...p.bunnyDone, id]) });
   },
   settings: (patch: Partial<Settings>) => {
     saved = { ...saved, settings: { ...saved.settings, ...patch } };

@@ -68,3 +68,9 @@ GitHub source upload and Vercel deployment are separate actions. A successful bu
 ## Practical limits
 
 This is a playable web release built from lightweight, procedural models and shared mission systems. It is not a native iOS/Android app or a commercial-art production. Automated Chromium checks do not replace playtesting with children or testing on real iPads and Android tablets. No 60 FPS guarantee is made; use lightweight graphics on slower devices. Narration quality depends on installed voices. Clearing browser data removes local progress.
+
+## Baby Bunny: One Hop (Phase 1)
+
+Open **Baby Bunny: One Hop** at the top of Home. Fifty short next-number exercises teach “start at the number shown, then take one hop.” Starting numbers are 1–14 and answers stay within 1–15; 15 + 1 is never asked. A nearby five-number bar, animated baby bunny, replayable spoken demonstration and unlimited retries support practice. Speech uses the existing voice, volume and mute settings; instructions remain visible. Progress saves separately for each local profile, with exercise replay and resume after reload. Existing missions and star rewards remain unchanged.
+
+With the development server running on port 5175, run `CHROMIUM_PATH=/usr/bin/chromium node tests/next-number.browser.mjs` to check all 50 exercises, spoken instructions, retries, saved progress and the phone layout. `GAME_URL` selects another development port.

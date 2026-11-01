@@ -147,3 +147,27 @@ test("Original mission IDs and saved rewards survive the addition expansion", ()
   const updated = parseSave(JSON.stringify({ profiles: [{ done: [51, 55] }] }));
   assert.deepEqual(updated.profiles[0].done, [51, 55]);
 });
+
+test("Phase 1 has 50 one-hop exercises within 1–15, never 15 + 1", async () => {
+  const { nextNumberExercises, nextNumberProgress } = await import("../src/next-number.ts");
+  assert.equal(nextNumberExercises.length, 50);
+  assert.equal(new Set(nextNumberExercises.map(q => q.id)).size, 50);
+  for (const q of nextNumberExercises) {
+    assert.ok(q.start >= 1 && q.start <= 14);
+    assert.equal(q.answer, q.start + 1);
+    assert.ok(q.answer <= 15);
+  }
+  assert.deepEqual([...new Set(nextNumberExercises.map(q => q.start))].sort((a,b) => a-b), Array.from({length:14}, (_,i)=>i+1));
+  assert.deepEqual(nextNumberProgress([1, 1, 50, 51, 0, 2.5, "2", null]), [1, 50]);
+});
+test("Bunny progress survives parsing without changing old rewards and stays profile-specific", () => {
+  const save = parseSave(JSON.stringify({profiles:[{name:"A",done:[1,51],bunnyDone:[1,50,50,51]},{name:"B",done:[2]}]}));
+  assert.deepEqual(save.profiles[0].bunnyDone,[1,50]);
+  assert.deepEqual(save.profiles[1].bunnyDone,[]);
+  assert.deepEqual(save.profiles[0].done,[1,51]);
+  assert.equal(save.profiles[0].stars,6);
+  store.reset(); store.completeBunny(1); store.completeBunny(1);
+  assert.deepEqual(store.profile().bunnyDone,[1]);
+  store.add(); assert.deepEqual(store.profile().bunnyDone,[]);
+  store.completeBunny(50); store.reset(); assert.deepEqual(store.profile().bunnyDone,[]);
+});
