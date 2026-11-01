@@ -53,11 +53,19 @@ export default function NextNumber({ onExit, worksheet = false }: { onExit: () =
       <p className="bunny-rule">Start here → one hop forward → next number</p>
       <div className="bunny-number-bar" aria-label="Nearby number bar">
         {bar.map((n) => <div key={n} className={`bunny-stop ${n === q.start ? "start" : ""} ${landed && n === q.answer ? "landed" : ""}`}>
-          <span className={`baby-bunny ${n === (landed ? q.answer : q.start) ? "visible" : ""}`} aria-hidden="true">🐰</span>
+          {n === q.start && <>
+            <svg className="bunny-hop-arrow" viewBox="0 0 200 100" preserveAspectRatio="none" role="img" aria-label={`One hop forward from ${q.start} to ${q.answer}`}>
+              <path d="M 50 85 Q 100 5 150 85" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 133 77 L 150 85 L 151 66" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="bunny-hop-label">+1 · one hop</span>
+            <span className={`baby-bunny visible ${landed ? "bunny-jumped" : ""}`} aria-hidden="true">🐰</span>
+          </>}
           <button aria-label={`Number ${n}`} disabled={demo || correct} onClick={() => answer(n)}>{n}</button>
           <small>{n === q.start ? "Start" : landed && n === q.answer ? "One hop!" : "\u00a0"}</small>
         </div>)}
       </div>
+      <p className="bunny-hop-explanation">Start at <strong>{q.start}</strong> → follow the arrow → hop once to <strong>{q.answer}</strong>.<br />Adding 1 means moving to the very next number.</p>
       <button className="primary" onClick={demonstrate} disabled={demo}>🔊 Show me one hop</button>
       <button className="bunny-listen" onClick={() => speak(message)}>🔊 Hear again</button>
       <p className="bunny-feedback" role="status">{message}</p>

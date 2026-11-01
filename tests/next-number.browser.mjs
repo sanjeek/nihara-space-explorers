@@ -12,6 +12,13 @@ try {
  await page.getByRole('button',{name:/Baby Bunny: One Hop/}).click();
  await page.getByRole('button',{name:'Show me one hop',exact:false}).click();
  await page.waitForFunction(()=>document.querySelector('.bunny-stop.landed button')?.textContent==='2');
+ assert.equal(await page.locator('.baby-bunny.bunny-jumped').count(),1);
+ await page.waitForFunction(() => {
+   const bunny = document.querySelector('.baby-bunny.bunny-jumped')?.getBoundingClientRect();
+   const target = document.querySelector('.bunny-stop.landed button')?.getBoundingClientRect();
+   return bunny && target && Math.abs((bunny.x + bunny.width / 2) - (target.x + target.width / 2)) < 1 && Math.abs(bunny.y - (target.y - 72)) < 1;
+ });
+ await page.screenshot({path:'/tmp/bunny-arrow-phone.png',fullPage:true});
  assert.ok((await page.evaluate(()=>window.__spoken.join(' '))).includes('Start at 1'));
  await page.getByRole('button',{name:'Number 1',exact:true}).click();
  await page.getByRole('status').filter({hasText:'Let’s try again'}).waitFor();
@@ -19,6 +26,8 @@ try {
  for(let i=0;i<90;i++){
    const start=Number(await page.locator('.bunny-start').innerText());
    assert.ok(start>=1 && start<=14);
+   assert.equal(await page.getByRole('img',{name:`One hop forward from ${start} to ${start+1}`,exact:true}).count(),1);
+   assert.match(await page.locator('.bunny-hop-explanation').innerText(),new RegExp(`hop once to ${start+1}`));
    if(i>=50){assert.ok(start+1<15);assert.match(await page.locator(".bunny-equation").innerText(), /\+ 1 = \?/);}
    await page.getByRole('button',{name:`Number ${start+1}`,exact:true}).click();
    await page.locator('.bunny-success').waitFor();
