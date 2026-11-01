@@ -49,7 +49,7 @@ export default function NextNumber({ onExit, worksheet = false }: { onExit: () =
     <section className="bunny-lesson" aria-label={`Exercise ${q.id}`}>
       <span className="eyebrow">EXERCISE {q.id} / {total}</span>
       <h2>Start at <span className="bunny-start">{q.start}</span>. What comes next?</h2>
-      {q.id > 50 && <div className="bunny-equation" aria-label={`${q.start} plus 1 equals ${correct ? q.answer : "what"}`}>{q.start} + 1 = <strong>{correct ? q.answer : "?"}</strong><small>Extra question {q.id - 50} / 20 · Add one</small></div>}
+      {q.id > 50 && <div className="bunny-equation" aria-label={`${q.start} plus 1 equals ${correct ? q.answer : "what"}`}>{q.start} + 1 = <strong>{correct ? q.answer : "?"}</strong><small>Extra question {q.id - 50} / {total - 50} · Add one</small></div>}
       <p className="bunny-rule">Start here → one hop forward → next number</p>
       <div className="bunny-number-bar" aria-label="Nearby number bar">
         {bar.map((n) => <div key={n} className={`bunny-stop ${n === q.start ? "start" : ""} ${landed && n === q.answer ? "landed" : ""}`}>

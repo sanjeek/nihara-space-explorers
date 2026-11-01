@@ -4,6 +4,7 @@ import VoiceSettings from "./VoiceSettings";
 import Puzzle from "./Puzzle";
 import Playroom from "./Playroom";
 import NextNumber from "./NextNumber";
+import { nextNumberExercises, additionOneExercises } from "./next-number";
 import { missions, worlds, worldUnlocked, type Mission } from "./missions";
 import { store, useSave } from "./state";
 import { music, sound, speak, stopVoice } from "./audio";
@@ -197,10 +198,10 @@ export default function App() {
         <>
           <main className="home">
             <button className="bunny-entry" onClick={() => navigate("bunny")}>
-              <span aria-hidden="true">🐰</span><span><strong>Baby Bunny: One Hop</strong><small>Phase 1 · Numbers 1–15 · {p.bunnyDone.length} / 70 complete</small></span><span>Let’s hop →</span>
+              <span aria-hidden="true">🐰</span><span><strong>Baby Bunny: One Hop</strong><small>Phase 1 · Numbers 1–15 · {p.bunnyDone.length} / {nextNumberExercises.length} complete</small></span><span>Let’s hop →</span>
             </button>
             <button className="bunny-entry" onClick={() => navigate("bunny-worksheet")}>
-              <span aria-hidden="true">📝</span><span><strong>20 Add-One Questions</strong><small>Like a little workbook · 2 + 1 = ? · Answers below 15</small></span><span>Try now →</span>
+              <span aria-hidden="true">📝</span><span><strong>{additionOneExercises.length} Add-One Questions</strong><small>Like a little workbook · 2 + 1 = ? · Answers below 15</small></span><span>Try now →</span>
             </button>
             <Playroom
               name={p.name}
