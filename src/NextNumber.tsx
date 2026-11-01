@@ -3,16 +3,17 @@ import { nextNumberExercises } from "./next-number";
 import { store, useSave } from "./state";
 import { sound, speak, stopVoice } from "./audio";
 
-export default function NextNumber({ onExit }: { onExit: () => void }) {
+export default function NextNumber({ onExit, worksheet = false }: { onExit: () => void; worksheet?: boolean }) {
   const save = useSave();
   const profile = save.profiles.find((p) => p.id === save.active)!;
-  const [index, setIndex] = useState(() => Math.max(0, nextNumberExercises.findIndex((q) => !profile.bunnyDone.includes(q.id))));
+  const [index, setIndex] = useState(() => Math.max(worksheet ? 50 : 0, nextNumberExercises.findIndex((q) => (!worksheet || q.id > 50) && !profile.bunnyDone.includes(q.id))));
   const [landed, setLanded] = useState(false);
   const [demo, setDemo] = useState(false);
   const [correct, setCorrect] = useState(false);
   const [message, setMessage] = useState("Start at the number shown, then take one hop.");
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const q = nextNumberExercises[index];
+  const total = nextNumberExercises.length;
   useEffect(() => () => { clearTimeout(timer.current); stopVoice(); }, []);
   function chooseExercise(i: number) {
     clearTimeout(timer.current);
@@ -38,16 +39,17 @@ export default function NextNumber({ onExit }: { onExit: () => void }) {
     const words = `You did it! Start at ${q.start}, one hop to ${q.answer}!`;
     setMessage(words); speak(words);
   }
-  const left = Math.max(1, Math.min(q.start - 1, 11));
+  const left = Math.max(1, Math.min(q.start - 1, q.id > 50 ? 10 : 11));
   const bar = Array.from({ length: 5 }, (_, i) => left + i);
   return <main className={`bunny-page ${save.settings.reducedMotion ? "bunny-reduced-motion" : ""}`}>
     <div className="bunny-heading"><button onClick={onExit}>← Back to games</button><span>PHASE 1 · ONE HOP</span></div>
     <h1>Baby Bunny’s next number</h1>
     <p>Start at the number shown, then take <strong>one hop</strong>.</p>
-    <div className="bunny-progress"><label htmlFor="bunny-progress">{profile.bunnyDone.length} of 50 exercises complete</label><progress id="bunny-progress" value={profile.bunnyDone.length} max={50} /></div>
+    <div className="bunny-progress"><label htmlFor="bunny-progress">{profile.bunnyDone.length} of {total} exercises complete</label><progress id="bunny-progress" value={profile.bunnyDone.length} max={total} /></div>
     <section className="bunny-lesson" aria-label={`Exercise ${q.id}`}>
-      <span className="eyebrow">EXERCISE {q.id} / 50</span>
+      <span className="eyebrow">EXERCISE {q.id} / {total}</span>
       <h2>Start at <span className="bunny-start">{q.start}</span>. What comes next?</h2>
+      {q.id > 50 && <div className="bunny-equation" aria-label={`${q.start} plus 1 equals ${correct ? q.answer : "what"}`}>{q.start} + 1 = <strong>{correct ? q.answer : "?"}</strong><small>Extra question {q.id - 50} / 20 · Add one</small></div>}
       <p className="bunny-rule">Start here → one hop forward → next number</p>
       <div className="bunny-number-bar" aria-label="Nearby number bar">
         {bar.map((n) => <div key={n} className={`bunny-stop ${n === q.start ? "start" : ""} ${landed && n === q.answer ? "landed" : ""}`}>
@@ -60,9 +62,9 @@ export default function NextNumber({ onExit }: { onExit: () => void }) {
       <button className="bunny-listen" onClick={() => speak(message)}>🔊 Hear again</button>
       <p className="bunny-feedback" role="status">{message}</p>
       {!correct && <p>Tap the number Bunny lands on. Take your time!</p>}
-      {correct && <div className="bunny-success"><strong>🌼 A lovely little hop!</strong><button className="primary" onClick={() => chooseExercise((index + 1) % 50)}>{profile.bunnyDone.length === 50 ? "All 50 done! Play again" : "Next exercise →"}</button></div>}
+      {correct && <div className="bunny-success"><strong>🌼 A lovely little hop!</strong><button className="primary" onClick={() => chooseExercise((index + 1) % total)}>{profile.bunnyDone.length === total ? "All done! Play again" : "Next exercise →"}</button></div>}
     </section>
     {!store.storageAvailable && <p role="alert">Progress cannot be saved on this device right now. You can still play.</p>}
-    <details className="bunny-exercises"><summary>Choose or replay an exercise · {profile.bunnyDone.length} / 50</summary><div>{nextNumberExercises.map((exercise, i) => <button key={exercise.id} aria-label={`Exercise ${exercise.id}${profile.bunnyDone.includes(exercise.id) ? ", complete" : ""}`} aria-current={i === index ? "step" : undefined} onClick={() => chooseExercise(i)}>{profile.bunnyDone.includes(exercise.id) ? "🌼 " : ""}{exercise.id}</button>)}</div></details>
+    <details className="bunny-exercises"><summary>Choose or replay an exercise · {profile.bunnyDone.length} / {total}</summary><div>{nextNumberExercises.map((exercise, i) => <button key={exercise.id} aria-label={`Exercise ${exercise.id}${profile.bunnyDone.includes(exercise.id) ? ", complete" : ""}`} aria-current={i === index ? "step" : undefined} onClick={() => chooseExercise(i)}>{profile.bunnyDone.includes(exercise.id) ? "🌼 " : ""}{exercise.id}</button>)}</div></details>
   </main>;
 }

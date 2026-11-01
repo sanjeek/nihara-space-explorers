@@ -15,24 +15,28 @@ try {
  assert.ok((await page.evaluate(()=>window.__spoken.join(' '))).includes('Start at 1'));
  await page.getByRole('button',{name:'Number 1',exact:true}).click();
  await page.getByRole('status').filter({hasText:'Let’s try again'}).waitFor();
- assert.match(await page.locator('.bunny-progress').innerText(),/0 of 50/);
- for(let i=0;i<50;i++){
+ assert.match(await page.locator('.bunny-progress').innerText(),/0 of 70/);
+ for(let i=0;i<70;i++){
    const start=Number(await page.locator('.bunny-start').innerText());
    assert.ok(start>=1 && start<=14);
+   if(i>=50){assert.ok(start+1<15);assert.match(await page.locator(".bunny-equation").innerText(), /\+ 1 = \?/);}
    await page.getByRole('button',{name:`Number ${start+1}`,exact:true}).click();
    await page.locator('.bunny-success').waitFor();
-   if(i<49)await page.getByRole('button',{name:'Next exercise →'}).click();
+   if(i<69)await page.getByRole('button',{name:'Next exercise →'}).click();
  }
- assert.match(await page.locator('.bunny-progress').innerText(),/50 of 50/);
+ assert.match(await page.locator('.bunny-progress').innerText(),/70 of 70/);
  await page.reload();
  await page.getByRole('button',{name:/Baby Bunny: One Hop/}).click();
- assert.match(await page.locator('.bunny-progress').innerText(),/50 of 50/);
+ assert.match(await page.locator('.bunny-progress').innerText(),/70 of 70/);
  const save=await page.evaluate(()=>JSON.parse(localStorage.getItem('nihara-space-v1')));
- assert.equal(save.profiles[0].bunnyDone.length,50);
+ assert.equal(save.profiles[0].bunnyDone.length,70);
  assert.deepEqual(save.profiles[0].done,[]);
  await page.getByRole('button',{name:'← Back to games'}).click();
  assert.equal(await page.locator('.playroom-game').count(),9);
+ await page.getByRole('button',{name:/20 Add-One Questions/}).click();
+ assert.match(await page.locator('.bunny-equation').innerText(),/Extra question 1 \/ 20/);
+ await page.getByRole('button',{name:'← Back to games'}).click();
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  assert.deepEqual(errors,[]);
- console.log('All 50 one-hop exercises, spoken demo, gentle retry, reload persistence, unchanged mission rewards, existing nine games and phone layout passed.');
+ console.log('All 70 one-hop exercises, spoken demo, gentle retry, reload persistence, unchanged mission rewards, existing nine games and phone layout passed.');
 } finally {await browser.close();}

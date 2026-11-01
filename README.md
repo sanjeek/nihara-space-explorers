@@ -74,3 +74,5 @@ This is a playable web release built from lightweight, procedural models and sha
 Open **Baby Bunny: One Hop** at the top of Home. Fifty short next-number exercises teach “start at the number shown, then take one hop.” Starting numbers are 1–14 and answers stay within 1–15; 15 + 1 is never asked. A nearby five-number bar, animated baby bunny, replayable spoken demonstration and unlimited retries support practice. Speech uses the existing voice, volume and mute settings; instructions remain visible. Progress saves separately for each local profile, with exercise replay and resume after reload. Existing missions and star rewards remain unchanged.
 
 With the development server running on port 5175, run `CHROMIUM_PATH=/usr/bin/chromium node tests/next-number.browser.mjs` to check all 50 exercises, spoken instructions, retries, saved progress and the phone layout. `GAME_URL` selects another development port.
+
+Twenty extra workbook-style **Add-One Questions** are available directly from Home. Exercises 51–70 show equations such as `2 + 1 = ?`, with all answers below 15. They retain bunny demonstrations and save progress with the original 50 exercises (70 total).

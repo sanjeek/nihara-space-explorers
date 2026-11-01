@@ -9,6 +9,7 @@ import { store, useSave } from "./state";
 import { music, sound, speak, stopVoice } from "./audio";
 type Route =
   | "bunny"
+  | "bunny-worksheet"
   | "home"
   | "map"
   | "play"
@@ -190,13 +191,16 @@ export default function App() {
           ))}
         </nav>
       )}
-      {route === "bunny" ? (
-        <NextNumber key={p.id} onExit={() => navigate("home")} />
+      {route === "bunny" || route === "bunny-worksheet" ? (
+        <NextNumber key={p.id + route} worksheet={route === "bunny-worksheet"} onExit={() => navigate("home")} />
       ) : route === "home" ? (
         <>
           <main className="home">
             <button className="bunny-entry" onClick={() => navigate("bunny")}>
-              <span aria-hidden="true">🐰</span><span><strong>Baby Bunny: One Hop</strong><small>Phase 1 · Numbers 1–15 · {p.bunnyDone.length} / 50 complete</small></span><span>Let’s hop →</span>
+              <span aria-hidden="true">🐰</span><span><strong>Baby Bunny: One Hop</strong><small>Phase 1 · Numbers 1–15 · {p.bunnyDone.length} / 70 complete</small></span><span>Let’s hop →</span>
+            </button>
+            <button className="bunny-entry" onClick={() => navigate("bunny-worksheet")}>
+              <span aria-hidden="true">📝</span><span><strong>20 Add-One Questions</strong><small>Like a little workbook · 2 + 1 = ? · Answers below 15</small></span><span>Try now →</span>
             </button>
             <Playroom
               name={p.name}
